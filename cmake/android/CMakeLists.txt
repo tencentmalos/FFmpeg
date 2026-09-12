@@ -62,8 +62,12 @@ ExternalProject_Add(ffmpeg_android_build
         "--cc=${cc}" "--cxx=${cxx}" "--ar=${tool_bin}/llvm-ar"
         "--ranlib=${tool_bin}/llvm-ranlib" "--nm=${tool_bin}/llvm-nm" "--strip=${tool_bin}/llvm-strip"
         "--sysroot=${CMAKE_SYSROOT}" --pkg-config=false ${options}
+    # Install in the same step that owns BUILD_BYPRODUCTS. With CMake 3.22,
+    # declaring installed archives as build outputs but copying them only in a
+    # later install step lets Ninja restat skip a required consumer relink.
     BUILD_COMMAND "${FFMPEG_MAKE}" "-j${FFMPEG_ANDROID_JOBS}"
-    INSTALL_COMMAND "${FFMPEG_MAKE}" install
+        COMMAND "${FFMPEG_MAKE}" install
+    INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${byproducts}
     BUILD_ALWAYS TRUE
     LOG_CONFIGURE ON LOG_BUILD ON LOG_INSTALL ON
